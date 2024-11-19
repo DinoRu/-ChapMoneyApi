@@ -1,4 +1,5 @@
 import uvicorn
+from authlib import author
 from fastapi import FastAPI
 
 from app.routers import users, accounts
@@ -11,7 +12,14 @@ from app.routers import sending_methods
 from app.routers import transfer_fees
 
 app = FastAPI(
-    title="Banking App"
+    title="Banking App",
+    description="Send money app",
+    author="Diarra Moustapha",
+    version="1.0.0",
+    openapi_url="/api/v1/openapi.json",
+    swagger_ui_parameters={
+        "persistAuthorization": True
+    }
 )
 
 app.include_router(users.router)

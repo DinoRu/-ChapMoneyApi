@@ -38,7 +38,7 @@ async def create_method(
 		session=session,
 		country_name=country_name,
 		method_name=request.name,
-		required_card=request.required_card_numbe
+		required_card=request.required_card_number
 	)
 
 

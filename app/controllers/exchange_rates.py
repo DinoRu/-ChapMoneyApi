@@ -88,7 +88,25 @@ class ExchangeRateController:
 			)
 		return {"detail": "Exchange rate updated successfully."}
 
-
+	@classmethod
+	async def modify_rate(cls, session: AsyncSession, from_currency: str, to_currency: str, new_rate: float):
+		exchange_rate = await exchange_rate_repository.get_exchange_rate(
+			session=session,
+			from_currency=from_currency,
+			to_currency=to_currency,
+		)
+		if not exchange_rate:
+			raise HTTPException(
+				status_code=status.HTTP_404_NOT_FOUND,
+				detail="Exchange not found."
+			)
+		updated_rate = await exchange_rate_repository.update_rate(session, exchange_rate, new_rate=new_rate)
+		if not updated_rate:
+			raise HTTPException(
+				status_code=status.HTTP_400_BAD_REQUEST,
+				detail="Exchange not found for updated."
+			)
+		return {'detail': "Exchange rate updated successfully."}
 
 	@classmethod
 	async def delete(cls, session: AsyncSession, from_currency: str, to_currency: str):
@@ -104,11 +122,16 @@ class ExchangeRateController:
 			)
 		return {"detail": "Exchange rate deleted successfully."}
 
-
-
 	@classmethod
-	async def delete_all(cls, session: AsyncSession):
-		pass
+	async def remove_all(cls, session: AsyncSession):
+		success = await exchange_rate_repository.delete_all(session)
+		if not success:
+			raise HTTPException(
+				status_code=status.HTTP_404_NOT_FOUND,
+				detail="Exchange rate not found or one of the currencies is invalid."
+			)
+		return {"detail": "Exchange rates deleted successfully."}
+
 
 
 exchange_rate_controller = ExchangeRateController()

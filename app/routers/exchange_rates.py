@@ -56,7 +56,7 @@ async def update_rate(
 		to_currency: str,
 		new_rate: float = Body(..., embed=True),
 		session: AsyncSession = Depends(get_session)):
-	return await exchange_rate_controller.update(
+	return await exchange_rate_controller.modify_rate(
 		session=session,
 		new_rate=new_rate,
 		from_currency=from_currency,
@@ -75,5 +75,9 @@ async def delete(
 		from_currency=from_currency,
 		to_currency=to_currency
 	)
+
+@router.delete('/clear', status_code=status.HTTP_200_OK, summary="Clear data.")
+async def clear(session: AsyncSession = Depends(get_session)):
+	return await exchange_rate_controller.remove_all(session)
 
 

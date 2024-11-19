@@ -20,7 +20,7 @@ services:
       echo 'Post-start tasks completed!.'
       "
     ports:
-      - "8000:8000"
+      - "4000:8000"
     depends_on:
       - db
     healthcheck:
@@ -42,7 +42,7 @@ services:
 
   db:
     image: postgres:15
-    container_name: tec-bloc_db
+    container_name: billing_db
     env_file:
       - .env
     restart: on-failure
@@ -68,7 +68,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx_proxy
+    container_name: billing_nginx_proxy
     ports:
       - "80:80"
     volumes:

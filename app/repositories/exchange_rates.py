@@ -1,3 +1,4 @@
+import uuid
 from sqlite3 import IntegrityError
 from typing import List, Sequence
 
@@ -62,8 +63,8 @@ class ExchangeRateRepository(BaseRepository):
 		result = await session.execute(query)
 		return result.scalars().first()
 
-
-	async def get_all_exchange_rates(self, session: AsyncSession) -> Sequence[ExchangeRates]:
+	@classmethod
+	async def get_all_exchange_rates(cls, session: AsyncSession) -> Sequence[ExchangeRates]:
 		query = select(ExchangeRates).options(
 			joinedload(ExchangeRates.from_currency),
 			joinedload(ExchangeRates.to_currency)
@@ -90,6 +91,14 @@ class ExchangeRateRepository(BaseRepository):
 		await session.commit()
 		return result.rowcount > 0
 
+	@classmethod
+	async def update_rate(cls, session: AsyncSession, exchange_rate: ExchangeRates, new_rate: float):
+		exchange_rate.rates = new_rate
+		session.add(exchange_rate)
+		await session.commit()
+		await session.refresh(exchange_rate)
+		return exchange_rate
+
 	async def delete_exchange_rate(self, session: AsyncSession, from_currency: str, to_currency:
 	str) -> bool | None:
 		from_currency_obj = await self.get_currency_by_name(session=session,
@@ -107,6 +116,13 @@ class ExchangeRateRepository(BaseRepository):
 			.execution_options(synchronize_session='fetch')
 		)
 		result = await session.execute(query)
+		await session.commit()
+		return result.rowcount > 0
+
+	@classmethod
+	async def delete_all(cls, session: AsyncSession) -> bool:
+		stmt = delete(ExchangeRates)
+		result = await session.execute(stmt)
 		await session.commit()
 		return result.rowcount > 0
 

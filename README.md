@@ -71,8 +71,8 @@ Cette API est une solution complète et flexible pour gérer les transactions fi
 ### 📦 **Installation :**
 1. Clonez le repository :  
    ```bash
-   git clone https://github.com/mon-compte/MultiCurrencyTransfer.git
-   cd MultiCurrencyTransfer
+   git clone https://github.com/mon-compte/-ChapMoneyApi.git
+   cd -ChapMoneyApi
    ```
 2. Configurez l’environnement :  
    ```bash
