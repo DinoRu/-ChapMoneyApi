@@ -32,6 +32,11 @@ async def transfer_to_user(
 		sender: User = Depends(get_current_user)
 ):
 	sender_id = sender.guid
+	if transfer_schema.amount < 100:
+		raise  HTTPException(
+			status_code=status.HTTP_401_UNAUTHORIZED,
+			detail="Transaction amount should greatest or equal 100 of your local currency"
+		)
 	transaction = await transaction_controller.transfer(
 		sender_id=sender_id,
 		session=session,

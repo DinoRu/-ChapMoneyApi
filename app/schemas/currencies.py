@@ -10,11 +10,11 @@ class CurrencyBase(BaseModel):
 	full_name: str
 	symbol: str
 
-class CreateCurrency(CustomConfig, CurrencyBase):
-	pass
+class CreateCurrency(CustomConfig):
+	name: str
 
-class UpdateCurrency(CustomConfig, CurrencyBase):
-	pass
+class UpdateCurrency(CustomConfig):
+	name: str
 
 
 class CurrencyResponse(CustomConfig, CurrencyBase):

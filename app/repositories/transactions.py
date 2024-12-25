@@ -31,7 +31,8 @@ class TransactionRepository:
 			completed_at=date,
 			sender_id=sender_id,
 			converted_amount=converted_amount,
-			final_amount=final_amount
+			final_amount=final_amount,
+			status=TransactionStatus.PENDING
 		)
 		session.add(transaction)
 		await session.commit()
