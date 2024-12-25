@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from enum import Enum as pyEnum
-from sqlalchemy import ForeignKey, Enum, Float, DateTime, DECIMAL, sql
+from sqlalchemy import ForeignKey, Enum, Float, DateTime, DECIMAL, sql, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy_utils import UUIDType
 
@@ -35,8 +35,6 @@ class Account(TimedBaseModel):
     account_name: Mapped[str] = mapped_column(nullable=False, index=True)
     account_number: Mapped[str] = mapped_column(nullable=False)
     account_type: Mapped[str] = mapped_column(nullable=True)
-    # methods: Mapped[list["SendingMethod"]] = relationship("SendingMethod", back_populates="account")
-
 
 
 class Country(TimedBaseModel):
@@ -45,7 +43,7 @@ class Country(TimedBaseModel):
     guid: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True,
                                             default=uuid.uuid4)
     name: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
-    code: Mapped[str] = mapped_column(nullable=True, unique=True)
+    code: Mapped[str] = mapped_column(String(3), nullable=True, unique=True)
     calling_phone: Mapped[str] = mapped_column(nullable=False, unique=True)
     flag_url: Mapped[str | None] = mapped_column(nullable=True)
     currency_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("currencies.guid"))
@@ -68,17 +66,17 @@ class Currency(TimedBaseModel):
     countries: Mapped[list["Country"]] = relationship("Country", back_populates='currency')
 
 
-class CurrencyPrice(TimedBaseModel):
-    __tablename__ = "currency_prices"
-
-    guid: Mapped[uuid.UUID] = (mapped_column(UUIDType(binary=False), primary_key=True, index=True,
-                               default=uuid.uuid4))
-    current_id: Mapped[uuid.UUID] = mapped_column(UUIDType(binary=False), ForeignKey(
-        "currencies.guid"))
-    price = Mapped[float]
-    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
-
-    currency = relationship('Currency', backref='prices')
+# class CurrencyPrice(TimedBaseModel):
+#     __tablename__ = "currency_prices"
+#
+#     guid: Mapped[uuid.UUID] = (mapped_column(UUIDType(binary=False), primary_key=True, index=True,
+#                                default=uuid.uuid4))
+#     current_id: Mapped[uuid.UUID] = mapped_column(UUIDType(binary=False), ForeignKey(
+#         "currencies.guid"))
+#     price = Mapped[float]
+#     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
+#
+#     currency = relationship('Currency', backref='prices')
 
 
 class ExchangeRates(TimedBaseModel):

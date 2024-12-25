@@ -41,6 +41,7 @@ class TransferOut(BaseModel):
     recipient_phone: str
     receiving_method: str
     status: TransactionStatus
+    sender: UserInfo
 
     class Config:
         from_attributes = True

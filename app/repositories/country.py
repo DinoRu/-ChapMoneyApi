@@ -41,6 +41,4 @@ class CountryRepository(BaseRepository):
 		return result.scalars().first()
 
 
-
-
 country_repository = CountryRepository()

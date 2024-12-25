@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 import jwt
@@ -65,7 +66,7 @@ class UserController:
         try:
             token_data = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
             is_active = token_data.get("is_active")
-            return bool(is_active and datetime.now().timestamp() < token_data.get('exp'))
+            return bool(is_active)
         except jwt.ExpiredSignatureError:
             raise False
         except jwt.InvalidTokenError:
@@ -73,8 +74,8 @@ class UserController:
 
     @staticmethod
     def create_token(email: str) -> str:
-        expires_at = (datetime.now() + timedelta(hours=settings.token_expires_hours)).timestamp()
-        payload = {"exp": expires_at, "email": email, "is_active": True}
+        # expires_at = (datetime.now() + timedelta(hours=settings.token_expires_hours)).timestamp()
+        payload = {"email": email, "is_active": True}
         return jwt.encode(payload=payload, key=settings.secret_key,
                           algorithm=settings.algorithm)
 
@@ -90,3 +91,8 @@ class UserController:
         token_data = jwt.decode(jwt=token, key=settings.secret_key, algorithms=[settings.algorithm])
         return token_data.get('email')
 
+    async def create_pin(self, pin: str, user: UserModel):
+        return await self.user_repo.set_pin_code(pin=pin, user=user)
+
+    async def verify_code_pin(self, pin: str, user: UserModel):
+        return await self.user_repo.verify_pin_code(pin=pin, user=user)

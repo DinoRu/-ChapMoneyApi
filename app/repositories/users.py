@@ -1,3 +1,4 @@
+import uuid
 from collections.abc import Iterable
 from typing import Optional, List
 
@@ -8,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.hash_password import HashPassword
 from app.models.users import User
-from app.schemas.users import CreateUser
+from app.schemas.users import CreateUser, SetPinRequest
 from app.utils.messages import messages
 
 hash_password = HashPassword()
@@ -25,6 +26,19 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return user
+
+    async def set_pin_code(self, pin: str, user: User):
+        hashed_pin = hash_password.create_hash(pin)
+        user.pin = hashed_pin
+        self.db.add(user)
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
+
+    async def verify_pin_code(self, pin: str, user: User) -> bool:
+        if user.pin:
+            return hash_password.verify_hash(pin, user.pin)
+        return False
 
     async def get_or_create(self, email: str, user_schema: Optional[CreateUser] = None) -> User:
         user = await self.get(email=email)
@@ -107,5 +121,4 @@ class UserRepository:
         else:
             order_by_field = getattr(User, order_by)
         return query.order_by(order_by_field)
-
 

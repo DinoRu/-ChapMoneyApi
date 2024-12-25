@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi_jwt import JwtAccessBearer, JwtRefreshBearer, JwtAuthorizationCredentials
+from fastapi_jwt import JwtAccessBearer, JwtRefreshBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.hash_password import HashPassword
@@ -8,7 +8,7 @@ from app.config import settings
 from app.controllers.users import UserController
 from app.database import get_session
 from app.dependencies import get_current_user
-from app.schemas.users import CreateUser, LoginCredentials, UpdatePassword, Email, User
+from app.schemas.users import CreateUser, LoginCredentials, UpdatePassword, Email, User, SetPinRequest
 from app.utils.mail import html_reset_password_mail, send_mail
 from app.utils.messages import messages
 
@@ -87,10 +87,40 @@ async def reset_password(token: str, data: UpdatePassword, session: AsyncSession
 			status_code=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION,
 			detail=messages.PASSWORDS_NOT_MATCH
 		)
-	await user_controller.reset_password(token=token, new_password=data.password, session=session)
+	await user_controller.reset_password(token=token, new_password=data.password)
 	return {"detail": messages.PASSWORD_RESET}
 
 @router.get("/info/", status_code=status.HTTP_200_OK,
 			summary="User info")
 async def get_user_info(current_user: User = Depends(get_current_user)):
-	return User.from_orm(current_user)
+	return User.model_validate(current_user)
+
+@router.post("/set_pin/", status_code=status.HTTP_201_CREATED,
+			 summary='Set user pin code')
+async def create_pin(
+		pin_request: SetPinRequest,
+		current_user: User = Depends(get_current_user),
+		session: AsyncSession = Depends(get_session)):
+	user_controller = UserController(db=session)
+	return  await user_controller.create_pin(pin=pin_request.pin, user=current_user)
+
+
+@router.post('/verify_pin',
+			status_code=status.HTTP_200_OK,
+			summary="Verify pin code...")
+async def verify_pin_code(
+		request: SetPinRequest,
+		current_user: User = Depends(get_current_user),
+		session: AsyncSession = Depends(get_session)
+):
+	user_controller = UserController(db=session)
+	is_valid = await user_controller.verify_code_pin(request.pin, user=current_user)
+	if not is_valid:
+		raise HTTPException(
+			status_code=status.HTTP_400_BAD_REQUEST,
+			detail="Code PIN invalide"
+		)
+	return {"message": "Code is valid"}
+
+async def get_pin():
+	pass
